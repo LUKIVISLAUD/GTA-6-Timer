@@ -48,6 +48,9 @@ html, body {margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow
 </head>
 <body>
 
+<!-- Muzyka w tle -->
+<audio id="bgMusic" src="muzyka/GTA 6 music.mp3" autoplay loop></audio>
+
 <div id="background"></div>
 <div id="overlay"></div>
 <div id="effects"></div>
@@ -148,7 +151,7 @@ const effects=document.getElementById('effects');
 createParticles(effects,40);
 createParticles(effects,30,true);
 
-// Latający napis “cwel” cały czas w ruchu i subtelny
+// Latający napis “cwel”
 const floatText=document.createElement("div");
 floatText.id="floatingText";
 floatText.textContent="wpisz cwel";
