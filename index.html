@@ -6,9 +6,36 @@
 <title>GTA 6 Timer</title>
 <style>
 html, body {margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:hidden;}
-#background{position:fixed;top:0;left:0;width:100%;height:100%;z-index:-3;background-image:url('tlo1.jpg');background-size:cover;background-position:center;transition:background-image 1s ease-in-out;}
+
+/* --- Background crossfade --- */
+#background, #background2 {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: -3;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+}
+#background { z-index: -3; }
+#background2 { z-index: -4; }
+
 #overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:-2;}
 #effects{position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;pointer-events:none;}
+
+/* Blur when trailer open */
+body.modal-open #background,
+body.modal-open #background2,
+body.modal-open #overlay,
+body.modal-open #effects,
+body.modal-open .logo-wrapper,
+body.modal-open .content-wrapper {
+  filter: blur(8px);
+  transition: filter 0.4s ease;
+}
+
+/* Loader */
 #loader{position:fixed;top:0;left:0;width:100vw;height:100vh;background:black;display:flex;justify-content:center;align-items:center;gap:5px;z-index:9999;}
 .loader-line{width:4px;height:16px;background:#8a2be2;border-radius:3px;animation:pulse 1s infinite ease-in-out;}
 .loader-line:nth-child(1){animation-delay:0s;}
@@ -18,37 +45,57 @@ html, body {margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow
 .loader-line:nth-child(5){animation-delay:0.6s;}
 @keyframes pulse{0%,100%{transform:scaleY(0.3);opacity:0.5}50%{transform:scaleY(1);opacity:1}}
 
-/* Logo osobno */
+/* Logo */
 .logo-wrapper {
   position: relative;
   z-index: 5;
   display: flex;
   justify-content: center;
-  margin-top: 5vh; /* ustawiasz wysokość logo niezależnie */
+  margin-top: 5vh;
+  transform: translateX(1%);
 }
 .logo-container { display: block; }
 .logo {
   width:300px;
   max-width:80%;
   opacity:0;
-  animation: fadeInLogo 2s ease forwards;
+  transform: scale(0.6);
+  transition: opacity 1.5s ease, transform 1.5s ease;
 }
-@keyframes fadeInLogo {
-  0% { opacity: 0; transform: scale(0.6); }
-  100% { opacity: 1; transform: scale(1); }
+.logo.show {
+  opacity:1;
+  transform: scale(1) translateY(-15%);
 }
 
-/* Timer + trailer + PS Store razem */
+/* Timer + trailer + PS Store */
 .content-wrapper {
   position: relative;
   z-index: 5;
   display: flex;
   justify-content: center;
-  margin-top: 33vh; /* blok przesuwany razem */
+  margin-top: 33vh;
 }
 .content {display:none;flex-direction:column;align-items:center;color:white;text-shadow:2px 2px 8px #000;}
-.timer{font-size:3rem;margin-top:10px;background:rgba(0,0,0,0.7);padding:20px 40px;border-radius:15px;border:2px solid #8a2be2;box-shadow:0 0 12px rgba(138,43,226,0.5);opacity:0;animation:fadeInTimer 2s ease forwards;color:#fff;text-shadow:0 0 6px rgba(138,43,226,0.2),0 0 10px rgba(138,43,226,0.15);}
+
+/* Neon effect */
+.neon-text {
+  color: #fff;
+  text-shadow: 0 0 5px rgba(138,43,226,0.8),
+               0 0 10px rgba(138,43,226,0.6),
+               0 0 20px rgba(138,43,226,0.5);
+  transition: transform 0.3s ease, text-shadow 0.3s ease;
+}
+.neon-text:hover {
+  transform: scale(1.15);
+  text-shadow: 0 0 10px rgba(138,43,226,1),
+               0 0 20px rgba(138,43,226,0.9),
+               0 0 30px rgba(138,43,226,0.8);
+}
+
+.timer{font-size:3rem;margin-top:10px;background:rgba(0,0,0,0.7);padding:20px 40px;border-radius:15px;border:2px solid #8a2be2;box-shadow:0 0 12px rgba(138,43,226,0.5);opacity:0;animation:fadeInTimer 2s ease forwards;}
 @keyframes fadeInTimer{from{opacity:0;transform:scale(0.8);}to{opacity:1;transform:scale(1);}}
+
+
 .trailer-container{display:flex;gap:20px;margin-top:30px;justify-content:center;opacity:0;animation:fadeInTrailers 2s ease forwards;animation-delay:3s;}
 @keyframes fadeInTrailers{from{opacity:0;transform:translateY(60px);}to{opacity:1;transform:translateY(0);}}
 .trailer-thumb{width:320px;cursor:pointer;border-radius:12px;overflow:hidden;border:3px solid rgba(138,43,226,0.6);box-shadow:0 0 15px rgba(138,43,226,0.5);transition:0.3s;}
@@ -56,14 +103,24 @@ html, body {margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow
 .trailer-label{margin-top:-8px;font-size:1rem;text-align:center;padding:6px 12px;border-radius:0 0 12px 12px;background:rgba(255,255,255,0.1);backdrop-filter:blur(10px);border-top:1px solid rgba(255,255,255,0.2);color:white;}
 .psstore{margin-top:40px;font-size:1.5rem;opacity:0;transform:translateY(30px);transition:all 1s ease;}
 .psstore.show{opacity:1;transform:translateY(0);}
-.psstore a{color:#fff;text-decoration:none;font-weight:bold;}
+.psstore a{color:#fff;text-decoration:none;font-weight:bold;display:inline-block;}
 
-/* modal */
+/* Modal trailer */
 .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);justify-content:center;align-items:center;z-index:10;}
-.modal.show{display:flex;animation:slideModal 0.6s ease forwards;}
-@keyframes slideModal{from{opacity:0;transform:translateY(-60px) scale(0.9);}to{opacity:1;transform:translateY(0) scale(1);}}
-.modal-content{position:relative;width:80%;max-width:800px;background:black;border-radius:15px;overflow:hidden;}
-.modal iframe{width:100%;height:450px;}
+.modal.show{display:flex;}
+.modal-content{
+  position:relative;
+  width:90%; 
+  max-width:1100px;
+  background:black;
+  border-radius:15px;
+  overflow:hidden;
+  transform:scale(0.8);
+  opacity:0;
+  transition:all 0.5s ease-in-out;
+}
+.modal.show .modal-content{transform:scale(1);opacity:1;}
+.modal iframe{width:100%;height:600px;}
 .close-btn{position:absolute;top:10px;right:15px;font-size:2rem;color:white;cursor:pointer;}
 
 /* particles */
@@ -109,6 +166,7 @@ html, body {margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow
 <body>
 
 <div id="background"></div>
+<div id="background2"></div>
 <div id="overlay"></div>
 <div id="effects"></div>
 
@@ -130,7 +188,7 @@ html, body {margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow
 <!-- Timer + trailer + PS Store -->
 <div class="content-wrapper">
   <div class="content">
-    <div class="timer" id="countdown"></div>
+    <div class="timer neon-text" id="countdown"></div>
     <div class="trailer-container">
       <div onclick="openTrailer('https://www.youtube.com/embed/QdBZY2fkU-0')">
         <img src="https://img.youtube.com/vi/QdBZY2fkU-0/hqdefault.jpg" class="trailer-thumb">
@@ -142,11 +200,12 @@ html, body {margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow
       </div>
     </div>
     <div class="psstore">
-      <a href="https://store.playstation.com/pl-pl/concept/10000730" target="_blank">PS Store</a>
+      <a href="https://store.playstation.com/pl-pl/concept/10000730" target="_blank" class="neon-text">PS Store</a>
     </div>
   </div>
 </div>
 
+<!-- Modal trailer -->
 <div class="modal" id="trailerModal">
   <div class="modal-content">
     <span class="close-btn" onclick="closeTrailer()">&times;</span>
@@ -171,30 +230,56 @@ function updateCountdown(){
 updateCountdown();
 setInterval(updateCountdown,1000);
 
-// Background
+// Background crossfade
 const backgrounds=['tlo1.jpg','tlo2.jpg','tlo3.jpg','tlo4.jpg'];
 let lastBackground=-1;
+let showingFirst=true;
 function changeBackgroundRandom(){
   let index;
   do{index=Math.floor(Math.random()*backgrounds.length);}while(index===lastBackground);
   lastBackground=index;
-  document.getElementById('background').style.backgroundImage=`url('${backgrounds[index]}')`;
+
+  const bg1=document.getElementById('background');
+  const bg2=document.getElementById('background2');
+
+  if(showingFirst){
+    bg2.style.backgroundImage=`url('${backgrounds[index]}')`;
+    bg2.style.opacity=1;
+    bg1.style.opacity=0;
+  } else {
+    bg1.style.backgroundImage=`url('${backgrounds[index]}')`;
+    bg1.style.opacity=1;
+    bg2.style.opacity=0;
+  }
+  showingFirst=!showingFirst;
 }
 setInterval(changeBackgroundRandom,20000);
+changeBackgroundRandom();
 
-// Modal
+// Modal trailer
 function openTrailer(url){
-  const modal=document.getElementById('trailerModal');
-  modal.classList.add("show");
-  modal.style.display="flex";
-  document.getElementById('trailerFrame').src=url;
+  const modal = document.getElementById('trailerModal');
+  modal.style.display = "flex";
+  requestAnimationFrame(() => {
+    modal.classList.add("show");
+    document.body.classList.add("modal-open");
+  });
+  const autoplayUrl = url.includes("?") ? url+"&autoplay=1&mute=1" : url+"?autoplay=1&mute=1";
+  document.getElementById('trailerFrame').src = autoplayUrl;
 }
 function closeTrailer(){
-  const modal=document.getElementById('trailerModal');
+  const modal = document.getElementById('trailerModal');
   modal.classList.remove("show");
-  modal.style.display="none";
-  document.getElementById('trailerFrame').src="";
+  document.body.classList.remove("modal-open");
+  setTimeout(()=>{
+    modal.style.display="none";
+    document.getElementById('trailerFrame').src="";
+  },400);
 }
+// kliknięcie w tło zamyka trailer
+document.getElementById('trailerModal').addEventListener('click', (e)=>{
+  if(e.target === e.currentTarget) closeTrailer();
+});
 
 // Particles
 function createParticles(container,count,white=false){
@@ -236,13 +321,10 @@ function showPSStore(){const psstore=document.querySelector('.psstore');setTimeo
 window.addEventListener("load",()=>{
   setTimeout(()=>{
     document.getElementById('loader').style.display='none';
-    const logoWrapper = document.querySelector('.logo-wrapper');
     const logo = document.querySelector('.logo');
     const content = document.querySelector('.content');
-
-    logoWrapper.style.display = 'flex'; // pokazujemy wrapper
-    content.style.display = 'flex';      // pokazujemy timer/trailer/PS Store
-    logo.style.animation = 'fadeInLogo 2s ease forwards';
+    content.style.display = 'flex';
+    logo.classList.add("show");
     showPSStore();
   },2000);
 });
